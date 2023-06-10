@@ -35,12 +35,16 @@ string Branch::getBranchName()
     return this->branch_name;
 }
 
-void Branch::getDataFromUrl()
+bool Branch::getDataFromUrl()
 {
     cout << endl
          << "Load branch " << this->branch_name << endl;
-    fromJson(get());
-    cout << "Load successful" << endl;
+    json temp = get();
+    if (temp != NULL)
+    {
+        return fromJson(temp);
+    }
+    return false;
 }
 
 size_t Branch::writeCallback(void *contents, size_t size, size_t nmemb, void *userp)
@@ -52,7 +56,7 @@ size_t Branch::writeCallback(void *contents, size_t size, size_t nmemb, void *us
 json Branch::get()
 {
     CURL *curl;
-    CURLcode httpCode;
+    CURLcode http_code;
     string buffer = "";
     curl = curl_easy_init();
     if (curl)
@@ -60,15 +64,23 @@ json Branch::get()
         curl_easy_setopt(curl, CURLOPT_URL, this->branch_url.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &buffer);
-        httpCode = curl_easy_perform(curl);
+        curl_easy_perform(curl);
+        curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
         curl_easy_cleanup(curl);
+        if (http_code == 200)
+        {
+            cout << "Load successful" << endl;
+            return json::parse(buffer);
+        }
+        cout << "Error: Data loading failed" << endl;
     }
-    return json::parse(buffer);
+    return NULL;
 }
 
 void Branch::comparePackagesName(const string file_path, unordered_map<string, string> data_other, string branch_name_other)
 {
-    cout << endl << "Compare name packages " << this->branch_name << " with " << branch_name_other << endl;
+    cout << endl
+         << "Compare name packages " << this->branch_name << " with " << branch_name_other << endl;
     unique_ptr<Data> res = make_unique<Data>();
 
     for (auto elem : this->data->packages)
@@ -85,7 +97,8 @@ void Branch::comparePackagesName(const string file_path, unordered_map<string, s
 
 void Branch::compareSharedPackagesVersion(const string file_path, unordered_map<string, string> data_other, string branch_name_other)
 {
-    cout << endl << "Compare version shared packages " << this->branch_name << " with " << branch_name_other << endl;
+    cout << endl
+         << "Compare version shared packages " << this->branch_name << " with " << branch_name_other << endl;
 
     unique_ptr<Data> res = make_unique<Data>();
 
@@ -105,13 +118,14 @@ void Branch::compareSharedPackagesVersion(const string file_path, unordered_map<
     cout << "Compare successful" << endl;
 }
 
-void Branch::fromJson(json branch_data)
+bool Branch::fromJson(json branch_data)
 {
     this->data->length = branch_data["length"];
     for (auto elem : branch_data["packages"])
     {
         data->packages[elem["name"]] = elem["version"];
     }
+    return true;
 }
 
 json Branch::toJson(unique_ptr<Data> answer)

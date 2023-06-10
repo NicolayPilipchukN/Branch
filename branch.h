@@ -43,7 +43,7 @@ namespace branch_info
         // Creating and filling in a JSON file
         void writeFile(const string file_path, unique_ptr<Data> data);
 
-        void fromJson(json branch_data);
+        bool fromJson(json branch_data);
         json toJson(unique_ptr<Data> answer);
 
     public:
@@ -54,7 +54,7 @@ namespace branch_info
         string getBranchName();
 
         // Launching a get request
-        void getDataFromUrl();
+        bool getDataFromUrl();
 
         // Comparing the names of two branches
         void comparePackagesName(const string file_path, unordered_map<string, string> data_other, string branch_name_other);

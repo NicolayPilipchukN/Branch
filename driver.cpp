@@ -29,23 +29,31 @@ int main(int argc, char **argv)
         }
 
         // Loading data
-        branch_first->getDataFromUrl();
-        branch_second->getDataFromUrl();
+        if (!branch_first->getDataFromUrl())
+        {
+            cout << "Exit app" << endl;
+            return -1;
+        }
+        if (!branch_second->getDataFromUrl())
+        {
+            cout << "Exit app" << endl;
+            return -1;
+        }
 
         // Comparison of package names from the first branch with the second
-        branch_first->comparePackagesName(NAME_FILE_COMPARISON_NAME_FIRST_SECOND, 
-                                            branch_second->getDataPackages(), 
-                                            branch_second->getBranchName());
+        branch_first->comparePackagesName(NAME_FILE_COMPARISON_NAME_FIRST_SECOND,
+                                          branch_second->getDataPackages(),
+                                          branch_second->getBranchName());
 
         // Comparison of package names from the second branch with the first
-        branch_second->comparePackagesName(NAME_FILE_COMPARISON_NAME_SECOND_FIRST, 
-                                            branch_first->getDataPackages(), 
-                                            branch_first->getBranchName());
+        branch_second->comparePackagesName(NAME_FILE_COMPARISON_NAME_SECOND_FIRST,
+                                           branch_first->getDataPackages(),
+                                           branch_first->getBranchName());
 
         // Comparing versions of shared packages from the first branch with the second
-        branch_first->compareSharedPackagesVersion(NAME_FILE_COMPARISON_VERSION_FIRST_SECOND, 
-                                                    branch_second->getDataPackages(), 
-                                                    branch_second->getBranchName());
+        branch_first->compareSharedPackagesVersion(NAME_FILE_COMPARISON_VERSION_FIRST_SECOND,
+                                                   branch_second->getDataPackages(),
+                                                   branch_second->getBranchName());
     }
     else
     {
