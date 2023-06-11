@@ -30,6 +30,7 @@ namespace branch_info
     class Branch
     {
     private:
+        string branch_arch;
         string branch_name;
         string branch_url;
         shared_ptr<Data> data;
@@ -48,7 +49,8 @@ namespace branch_info
 
     public:
         Branch();
-        Branch(std::string);
+        Branch(string);
+        Branch(string, string);
         ~Branch();
 
         string getBranchName();

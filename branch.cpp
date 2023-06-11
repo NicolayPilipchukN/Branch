@@ -4,6 +4,8 @@ using namespace branch_info;
 
 static const std::string API = R"(https://rdb.altlinux.org/api/export/branch_binary_packages/)";
 
+static const string REQUEST_ARCH = "?arch=";
+
 Data::Data()
 {
     this->length = 0;
@@ -17,9 +19,19 @@ void Data::push(string name, string version)
 
 Branch::Branch()
 {
-    cout << "Enter branch (example: p10): ";
+    cout << "\nEnter branch (example: p10): ";
     cin >> this->branch_name;
+
+    cout << "\nEnter \'all\' to get all architectures for branch " << this->branch_name << "\nEnter arch (example: aarch64): ";
+    cin >> this->branch_arch;
+
     this->branch_url = API + this->branch_name;
+
+    if (this->branch_arch != "all")
+    {
+        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
+    }
+
     this->data = make_shared<Data>();
 }
 
@@ -27,6 +39,23 @@ Branch::Branch(string branch_name)
 {
     this->branch_name = branch_name;
     this->branch_url = API + this->branch_name;
+
+    cout << "\nEnter \'all\' to get all architectures for branch " << this->branch_name << "\nEnter arch (example: aarch64): ";
+    cin >> this->branch_arch;
+
+    if (this->branch_arch != "all")
+    {
+        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
+    }
+
+    this->data = make_shared<Data>();
+}
+
+Branch::Branch(string branch_name, string branch_arch)
+{
+    this->branch_name = branch_name;
+    this->branch_arch = branch_arch;
+    this->branch_url = API + this->branch_name + REQUEST_ARCH + this->branch_arch;
     this->data = make_shared<Data>();
 }
 
@@ -40,10 +69,12 @@ bool Branch::getDataFromUrl()
     cout << endl
          << "Load branch " << this->branch_name << endl;
     json temp = get();
+
     if (temp != NULL)
     {
         return fromJson(temp);
     }
+
     return false;
 }
 
@@ -114,17 +145,18 @@ void Branch::compareSharedPackagesVersion(const string file_path, unordered_map<
     }
 
     writeFile(file_path, move(res));
-
     cout << "Compare successful" << endl;
 }
 
 bool Branch::fromJson(json branch_data)
 {
     this->data->length = branch_data["length"];
+
     for (auto elem : branch_data["packages"])
     {
         data->packages[elem["name"]] = elem["version"];
     }
+
     return true;
 }
 
@@ -132,13 +164,16 @@ json Branch::toJson(unique_ptr<Data> answer)
 {
     json res = {{"length", 0},
                 {"packages", {{{"name", ""}, {"version", ""}}}}};
+
     res["length"] = answer->length;
+
     auto it = answer->packages.begin();
-    for (size_t i = 0, length = res["length"]; i < length && it != answer->packages.end(); i++, it++)
+    for (size_t i = 0, length = res["length"]; i < length; i++, it++)
     {
         res["packages"][i]["name"] = it->first;
         res["packages"][i]["version"] = it->second;
     }
+
     return res;
 }
 
@@ -149,17 +184,15 @@ unordered_map<string, string> Branch::getDataPackages()
 
 void Branch::writeFile(const string file_path, unique_ptr<Data> data)
 {
-    ofstream file;
-    file.open(file_path, ios::out);
+    ofstream file(file_path, ios::out);
+
     if (file.is_open())
     {
         file << this->toJson(move(data)) << endl;
         file.close();
+        return;
     }
-    else
-    {
-        cout << "Json file doesn't open or create!" << endl;
-    }
+    cout << "Json file doesn't open or create!" << endl;
 }
 
 Branch::~Branch()
