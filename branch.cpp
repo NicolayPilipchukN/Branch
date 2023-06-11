@@ -55,7 +55,13 @@ Branch::Branch(string branch_name, string branch_arch)
 {
     this->branch_name = branch_name;
     this->branch_arch = branch_arch;
-    this->branch_url = API + this->branch_name + REQUEST_ARCH + this->branch_arch;
+    this->branch_url = API + this->branch_name;
+
+    if (this->branch_arch != "all")
+    {
+        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
+    }
+
     this->data = make_shared<Data>();
 }
 

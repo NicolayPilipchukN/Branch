@@ -4,19 +4,22 @@
 * Enter the command in the downloaded folder "make run_all"
 * Enter the password to access root
 ## Starting after installation
-### The application can be launched in two ways:
+### The application can be launched in three ways:
 * The first option: without parameters.<br>
-The application interface will prompt you to enter the names of the branches.
-![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/7577bf11-aee4-4039-85d4-4db85ddf0673)
+The application interface will prompt you to enter the names of branches and their architecture.
+![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/89769444-6b29-4da8-8c0f-5a5cbf5eed55)
 * Second option: with two additional parameters.<br>
-The parameters indicate the names of branches.
-![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/7945ac58-5dd5-421c-821a-63337b2ffa0a)
+The names of the branches are specified in the parameters. You will be asked to enter their architectures.
+![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/94f29193-c8f7-475a-9cb1-64c72180b58f)
+* Third option: specify four additional parameters.<br>
+The first parameter is branch_1, the second parameter is branch_2, the third parameter is arch_1, the fourth parameter is arch_2.
+![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/6d1cb1c5-1a72-47e9-896e-77d27f8c0e45)
 ## Libraries used:
 * For a get request: curl
 * For processing json data: nlohmann-json
 ## Description
 ### Makefile
-#### The run_all command runs various scripts. 
+#### The run_all command runs various scripts.
 The installation of the application takes place in several stages:<br>
 The first stage is downloading the necessary libraries.<br>
 The second stage is the creation of shared libraries.<br>
@@ -186,7 +189,7 @@ private:
         string branch_name;
         string branch_url;
         shared_ptr<Data> data;
-        
+
 //struct Data
   unsigned long length;
   // Key: name_package, value: version package
