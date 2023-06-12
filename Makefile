@@ -1,50 +1,46 @@
-h_name = branch.h
-cpp_name = branch.cpp
-o_name = branch.o
-driver_name = driver.cpp
-app_name = driver
-lib_name = libbranch.so.1
-lib_full_name = libbranch.so.1.0.7
-lib_short_name = libbranch.so
-lib_ref_name = -lbranch
-lib_install_path = /usr/lib
-lib_include_path = /usr/local/include
+APP_NAME ?= driver
+APP_PATH_INSTALL = /usr/local/bin
+APP_SRC = driver.cpp
+APP_OBJ = $(APP_SRC:.cpp=.o)
 
-run_all:
-	@make -s download_libraries
-	@make -s create_shared_library
-	@make -s install_shared_library
-	@make -s create_driver
-	@make -s launch_driver
+LIB_PATH_INSTALL = /usr/lib
+LIB_NAME = libbranch.so.1
+LIB_NAME_FULL = libbranch.so.1.0.1
+LIB_NAME_SHORT = libbranch.so
+LIB_NAME_REF = lbranch
+LIB_SRC = branch.cpp
+LIB_HDR = branch.h
+LIB_OBJ = $(LIB_SRC:.cpp=.o)
 
-download_libraries:
-	@sudo apt-get install gcc
-	@sudo apt-get install gcc-c++
-	@sudo apt-get install libcurl-devel
-	@sudo apt-get install nlohmann-json-devel
+CXX ?= g++
+CXXFLAGS ?= -lcurl -std=c++14
+SOFLAGS = -$(LIB_NAME_REF)
+LINKFLAGS = -Wl,-rpath,$(LIB_PATH_INSTALL)
 
-create_shared_library:
-	@g++ -fpic -c $(cpp_name)
-	@g++ -shared -Wl,-soname,$(lib_name) -o $(lib_full_name) $(o_name)
+.PHONY: all so soinstall clean install uninstall
+.SILENT: all $(APP_NAME) $(APP_OBJ) so soinstall clean install uninstall
 
+all: $(APP_NAME) install
 
-install_shared_library:
-	@sudo install -m 0644 $(lib_full_name) $(lib_install_path)
-	@sudo ln -sf $(lib_install_path)/$(lib_full_name) $(lib_install_path)/$(lib_short_name)
-	@sudo cp $(h_name) $(lib_include_path)
-	@sudo ldconfig -n $(lib_install_path)
-	@echo 'export LD_LIBRARY_PATH='$(lib_install_path)':$$LD_LIBRARY_PATH' >> /home/$(USER)/.bashrc
-	@export LD_LIBRARY_PATH=$(lib_install_path):$LD_LIBRARY_PATH
+$(APP_NAME): so $(APP_OBJ)
+	$(CXX) $(LINKFLAGS) -o $(APP_NAME) $(APP_OBJ) $(SOFLAGS) $(CXXFLAGS)
 
-create_driver:
-	@g++ $(driver_name) $(lib_ref_name) -L$(lib_install_path) -o $(app_name) -lcurl -std=c++14
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-del_temp_files:
-	@sudo rm $(driver_name) $(o_name) $(cpp_name) $(h_name) $(lib_full_name)
+so:
+	$(CXX) -fpic -c $(LIB_SRC)
+	$(CXX) -shared -Wl,-soname,$(LIB_NAME) -o $(LIB_NAME_FULL) $(LIB_OBJ)
+	sudo install $(LIB_NAME_FULL) $(LIB_PATH_INSTALL)
+	sudo ln -sf $(LIB_PATH_INSTALL)/$(LIB_NAME_FULL) $(LIB_PATH_INSTALL)/$(LIB_NAME_SHORT)
+	sudo ldconfig -n $(LIB_PATH_INSTALL)
 
-launch_driver:
-	@./$(app_name)
+clean:
+	rm -rf $(APP_NAME) $(APP_OBJ) $(LIB_OBJ) $(LIB_NAME_FULL)
 
-.PHONY: install
+install:
+	sudo install $(APP_NAME) $(APP_PATH_INSTALL)
 
-
+uninstall:
+	sudo rm -rf $(APP_PATH_INSTALL)/$(APP_NAME)
+	sudo rm -rf $(LIB_PATH_INSTALL)/$(LIB_NAME_SHORT)*
