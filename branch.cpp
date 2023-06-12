@@ -17,49 +17,27 @@ void Data::push(string name, string version)
     this->packages[name] = version;
 }
 
-Branch::Branch()
-{
-    cout << "\nEnter branch (example: p10): ";
-    cin >> this->branch_name;
-
-    cout << "\nEnter \'all\' to get all architectures for branch " << this->branch_name << "\nEnter arch (example: aarch64): ";
-    cin >> this->branch_arch;
-
-    this->branch_url = API + this->branch_name;
-
-    if (this->branch_arch != "all")
-    {
-        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
-    }
-
-    this->data = make_shared<Data>();
-}
-
-Branch::Branch(string branch_name)
-{
-    this->branch_name = branch_name;
-    this->branch_url = API + this->branch_name;
-
-    cout << "\nEnter \'all\' to get all architectures for branch " << this->branch_name << "\nEnter arch (example: aarch64): ";
-    cin >> this->branch_arch;
-
-    if (this->branch_arch != "all")
-    {
-        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
-    }
-
-    this->data = make_shared<Data>();
-}
-
 Branch::Branch(string branch_name, string branch_arch)
 {
     this->branch_name = branch_name;
+    if (branch_name == "")
+    {
+        cout << "\nEnter branch (example: p10): ";
+        cin >> this->branch_name;
+    }
+
     this->branch_arch = branch_arch;
+    if (branch_arch == "")
+    {
+        cout << "\nEnter \'all\' to get all architectures for branch " << this->branch_name << "\nEnter arch (example: aarch64): ";
+        cin >> this->branch_arch;
+    }
+
     this->branch_url = API + this->branch_name;
 
     if (this->branch_arch != "all")
     {
-        this->branch_url = this->branch_url + REQUEST_ARCH + this->branch_arch;
+        this->branch_url += REQUEST_ARCH + this->branch_arch;
     }
 
     this->data = make_shared<Data>();
@@ -114,10 +92,12 @@ json Branch::get()
     return NULL;
 }
 
-void Branch::comparePackagesName(const string file_path, unordered_map<string, string> data_other, string branch_name_other)
+void Branch::comparePackagesName(json& result,
+                                 const string key_name,
+                                 const string branch_name_other,
+                                 const unordered_map<string, string> &data_other)
 {
-    cout << endl
-         << "Compare name packages " << this->branch_name << " with " << branch_name_other << endl;
+    cout << "\nCompare name packages " << this->branch_name << " with " << branch_name_other << endl;
     unique_ptr<Data> res = make_unique<Data>();
 
     for (auto elem : this->data->packages)
@@ -128,14 +108,17 @@ void Branch::comparePackagesName(const string file_path, unordered_map<string, s
         }
     }
 
-    writeFile(file_path, move(res));
+    result[key_name] = toJson(move(res));
+
     cout << "Compare successful" << endl;
 }
 
-void Branch::compareSharedPackagesVersion(const string file_path, unordered_map<string, string> data_other, string branch_name_other)
+void Branch::compareSharedPackagesVersion(json& result,
+                                          const string key_name,
+                                          const string branch_name_other,
+                                          const unordered_map<string, string> &data_other)
 {
-    cout << endl
-         << "Compare version shared packages " << this->branch_name << " with " << branch_name_other << endl;
+    cout << "\nCompare version shared packages " << this->branch_name << " with " << branch_name_other << endl;
 
     unique_ptr<Data> res = make_unique<Data>();
 
@@ -150,7 +133,8 @@ void Branch::compareSharedPackagesVersion(const string file_path, unordered_map<
         }
     }
 
-    writeFile(file_path, move(res));
+    result[key_name] = toJson(move(res));
+
     cout << "Compare successful" << endl;
 }
 
@@ -188,19 +172,20 @@ unordered_map<string, string> Branch::getDataPackages()
     return this->data->packages;
 }
 
-void Branch::writeFile(const string file_path, unique_ptr<Data> data)
+Branch::~Branch()
+{
+}
+
+void branch_info::writeData(const string file_path, json& data)
 {
     ofstream file(file_path, ios::out);
 
     if (file.is_open())
     {
-        file << this->toJson(move(data)) << endl;
+        file << data << endl;
         file.close();
         return;
     }
-    cout << "Json file doesn't open or create!" << endl;
-}
 
-Branch::~Branch()
-{
+    cout << "Json file doesn't open or create!" << endl;
 }

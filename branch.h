@@ -41,15 +41,10 @@ namespace branch_info
         // Getting REST API data
         json get();
 
-        // Creating and filling in a JSON file
-        void writeFile(const string file_path, unique_ptr<Data> data);
-
         bool fromJson(json branch_data);
         json toJson(unique_ptr<Data> answer);
 
     public:
-        Branch();
-        Branch(string);
         Branch(string, string);
         ~Branch();
 
@@ -59,14 +54,16 @@ namespace branch_info
         bool getDataFromUrl();
 
         // Comparing the names of two branches
-        void comparePackagesName(const string file_path, unordered_map<string, string> data_other, string branch_name_other);
+        void comparePackagesName(json&, const string, const string, const unordered_map<string, string> &);
 
         // Comparison of versions of common packages
-        void compareSharedPackagesVersion(const string file_path, unordered_map<string, string> data_other, string branch_name_other);
+        void compareSharedPackagesVersion(json&, const string, const string, const unordered_map<string, string> &);
 
         // Getting a list of packages and their versions
         unordered_map<string, string> getDataPackages();
     };
+
+    void writeData(const string file_path, json& data);
 }
 
 #endif

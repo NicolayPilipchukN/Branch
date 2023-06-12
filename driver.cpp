@@ -1,10 +1,10 @@
 #include "branch.h"
 
-enum CountArgs
+enum Args
 {
-    ONE = 1,
-    THREE = 3,
-    FIVE = 5
+    NO_ARGS = 1,
+    NAME_BRANCH = 3,
+    NAME_BRANCH_ARCH = 5
 };
 
 using namespace branch_info;
@@ -15,28 +15,26 @@ static const string NAME_FILE_COMPARISON_VERSION = "comparison_package_version_"
 
 int main(int argc, char **argv)
 {
-    if (argc != ONE && argc != THREE && argc != FIVE)
-    {
-        cout << "Invalid launch app" << endl;
-        return -1;
-    }
-
     unique_ptr<Branch> branch_first;
     unique_ptr<Branch> branch_second;
 
     switch (argc)
     {
-    case ONE:
-        branch_first = make_unique<Branch>();
-        branch_second = make_unique<Branch>();
+    case NO_ARGS:
+        branch_first = make_unique<Branch>("", "");
+        branch_second = make_unique<Branch>("", "");
         break;
-    case THREE:
-        branch_first = make_unique<Branch>(argv[1]);
-        branch_second = make_unique<Branch>(argv[2]);
+    case NAME_BRANCH:
+        branch_first = make_unique<Branch>(argv[1], "");
+        branch_second = make_unique<Branch>(argv[2], "");
         break;
-    case FIVE:
+    case NAME_BRANCH_ARCH:
         branch_first = make_unique<Branch>(argv[1], argv[3]);
         branch_second = make_unique<Branch>(argv[2], argv[4]);
+        break;
+    default:
+        cout << "Invalid launch app" << endl;
+        return -1;
     }
 
     // Loading data
@@ -51,32 +49,20 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    string file_name_first = NAME_FILE_COMPARISON_NAME +
-                             branch_first->getBranchName() +
-                             "_with_" +
-                             branch_second->getBranchName() +
-                             ".json";
+    string file_name = "result.json";
 
-    string file_name_second = NAME_FILE_COMPARISON_NAME +
-                              branch_second->getBranchName() +
-                              "_with_" +
-                              branch_first->getBranchName() +
-                              ".json";
-
-    string file_name_third = NAME_FILE_COMPARISON_VERSION +
-                             branch_second->getBranchName() +
-                             "_with_" +
-                             branch_first->getBranchName() +
-                             ".json";
+    json result;
 
     // Comparison of package names from the first branch with the second
-    branch_first->comparePackagesName(file_name_first, branch_second->getDataPackages(), branch_second->getBranchName());
+    branch_first->comparePackagesName(result, "cmp_nm_b1_b2", branch_second->getBranchName(), branch_second->getDataPackages());
 
     // Comparison of package names from the second branch with the first
-    branch_second->comparePackagesName(file_name_second, branch_first->getDataPackages(), branch_first->getBranchName());
+    branch_second->comparePackagesName(result, "cmp_nm_b2_b1", branch_first->getBranchName(), branch_first->getDataPackages());
 
     // Comparing versions of shared packages from the first branch with the second
-    branch_first->compareSharedPackagesVersion(file_name_third, branch_second->getDataPackages(), branch_second->getBranchName());
+    branch_first->compareSharedPackagesVersion(result, "cmp_v_b1_b2", branch_second->getBranchName(), branch_second->getDataPackages());
+
+    writeData(file_name, result);
 
     return 0;
 }

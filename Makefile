@@ -17,8 +17,8 @@ CXXFLAGS ?= -lcurl -std=c++14
 SOFLAGS = -$(LIB_NAME_REF)
 LINKFLAGS = -Wl,-rpath,$(LIB_PATH_INSTALL)
 
-.PHONY: all so soinstall clean install uninstall
-.SILENT: all $(APP_NAME) $(APP_OBJ) so soinstall clean install uninstall
+.PHONY: all so clean install uninstall
+.SILENT: all $(APP_NAME) $(APP_OBJ) so clean install uninstall
 
 all: $(APP_NAME) install
 
