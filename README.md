@@ -13,13 +13,13 @@ The key of the second task: "cmp_nm_b2_b1".<br>
 The key of the third task: "cmp_v_b1_b2".<br>
 ### The application can be launched in three ways:
 * The first option: without parameters.<br>
-The application interface will prompt you to enter the names of branches and their architecture.
+The application interface will prompt you to enter the names of branches and their architecture.<br>
 ![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/af6de946-76fb-484a-a9b6-e18c254b62a2)
 * Second option: with two additional parameters.<br>
-The names of the branches are specified in the parameters. You will be asked to enter their architectures.
+The names of the branches are specified in the parameters. You will be asked to enter their architectures.<br>
 ![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/8a4c2262-afcd-4c12-b8cd-03e5deff3281)
 * Third option: specify four additional parameters.<br>
-The first parameter is branch_1, the second parameter is branch_2, the third parameter is arch_1, the fourth parameter is arch_2.
+The first parameter is branch_1, the second parameter is branch_2, the third parameter is arch_1, the fourth parameter is arch_2.<br>
 ![image](https://github.com/NicolayPilipchukN/Branch/assets/122270528/817708b6-4ccf-460e-accf-ef59c026826a)
 ## Libraries used:
 * For a get request: curl
